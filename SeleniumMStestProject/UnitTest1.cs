@@ -14,6 +14,9 @@ namespace SeleniumMStestProject
             this.driver = new ChromeDriver();
 
         }
+
+
+
         [TestMethod]
         public void GoToTestPage()
         {
@@ -27,6 +30,12 @@ namespace SeleniumMStestProject
 
             Assert.AreEqual( baseUrl, currentPage );
             
+        }
+
+        [TestMethod]
+        public void WhenUserGoToTestPageCanFillAllTextFields()
+        {
+
         }
 
         [TestCleanup] public void Cleanup()
