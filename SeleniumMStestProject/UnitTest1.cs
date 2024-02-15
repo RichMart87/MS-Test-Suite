@@ -1,5 +1,7 @@
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using SeleniumMStestProject.Pages;
 using System.Configuration;
 using TestManagement.Selenium;
 
@@ -9,10 +11,11 @@ namespace SeleniumMStestProject
     public class InitialTests
     {
         private ChromeDriver driver;
+        private TestPageLanding testPage;
         [TestInitialize] public void Setup()
         {
             this.driver = new ChromeDriver();
-
+            testPage = new TestPageLanding(driver);
         }
 
 
@@ -35,8 +38,14 @@ namespace SeleniumMStestProject
         [TestMethod]
         public void WhenUserGoToTestPageCanFillAllTextFields()
         {
+            GoToTestPage();
+            testPage.SelectOptionInMyDropdown("Set to 75%");
+            
+            testPage.EnterTextInMyInput("This is test text.");
 
         }
+
+
 
         [TestCleanup] public void Cleanup()
         {
