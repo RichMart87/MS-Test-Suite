@@ -12,27 +12,26 @@ namespace SeleniumMStestProject
     {
         private ChromeDriver driver;
         private TestPageLanding testPage;
-        [TestInitialize] public void Setup()
+
+        [TestInitialize]
+        public void Setup()
         {
             this.driver = new ChromeDriver();
             testPage = new TestPageLanding(driver);
         }
-
-
 
         [TestMethod]
         public void GoToTestPage()
         {
             var baseUrl = Config.BaseUrl;
             Console.WriteLine($"Base URL: {baseUrl}");
-            
+
             driver.Manage().Window.Maximize();
-            driver.Navigate().GoToUrl( baseUrl );
+            driver.Navigate().GoToUrl(baseUrl);
 
             var currentPage = driver.Url;
 
-            Assert.AreEqual( baseUrl, currentPage );
-            
+            Assert.AreEqual(baseUrl, currentPage);
         }
 
         [TestMethod]
@@ -40,18 +39,18 @@ namespace SeleniumMStestProject
         {
             GoToTestPage();
             testPage.SelectOptionInMyDropdown("Set to 75%");
-            
-            testPage.EnterTextInMyInput("This is test text.");
 
+            testPage.EnterTextInMyInput("This is test text.");
         }
 
-
-
-        [TestCleanup] public void Cleanup()
+        [TestCleanup]
+        public void Cleanup()
         {
-            if ( this.driver != null )
+            if (this.driver != null)
             {
                 this.driver.Quit();
+                this.driver.Dispose();
+                this.driver = null;
             }
         }
     }
