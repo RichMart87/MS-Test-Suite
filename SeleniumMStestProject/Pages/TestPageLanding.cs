@@ -18,11 +18,11 @@ namespace SeleniumMStestProject.Pages
             this.driver = driver;
         }
 
-        public IWebElement Button => driver.FindElement(By.XPath("//*[@id=\"myButton\"]"));
+        public IWebElement Button => driver.FindElement(By.XPath("//*[@id='myButton']"));
 
-        public IWebElement TextInputField => driver.FindElement(By.XPath("//*[@id=\"myTextInput\"]"));
+        public IWebElement TextInputField => driver.FindElement(By.XPath("//*[@id='myTextInput']"));
 
-        public IWebElement DropDownSelect => driver.FindElement(By.XPath("//*[@id=\"mySelect\"]"));
+        public IWebElement DropDownSelect => driver.FindElement(By.XPath("//*[@id='mySelect']"));
 
         public IWebElement SingleCheckbox => driver.FindElement(By.Id("checkBox1"));
 
@@ -38,7 +38,7 @@ namespace SeleniumMStestProject.Pages
             TextInputField.Clear();
             TextInputField.SendKeys(text);
 
-            Assert.AreEqual(text, TextInputField.Text);
+            Assert.AreEqual(text, TextInputField.GetAttribute("value"));
         }
 
         public void SelectOptionInMyDropdown(string optionText)
@@ -48,7 +48,7 @@ namespace SeleniumMStestProject.Pages
             var select = new SelectElement(DropDownSelect);
             select.SelectByText(optionText);
 
-            Assert.AreEqual(optionText, DropDownSelect.Text);
+            Assert.AreEqual(optionText, select.SelectedOption.Text);
         }
 
         public bool IsMyCheckboxSelected()
@@ -60,7 +60,5 @@ namespace SeleniumMStestProject.Pages
         {
             return UrlLink.Text;
         }
-
-
     }
 }
