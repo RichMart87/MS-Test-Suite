@@ -11,7 +11,6 @@ namespace SeleniumMStestProject.Controls
         DataTerm,
         DataSysTestId,
         PartialCssClass
-
     }
 
     internal class Control
@@ -24,7 +23,7 @@ namespace SeleniumMStestProject.Controls
             var controlMetadata = new MetadataBuilder();
 
             //this.Name = controlMetadata.ControlName;
-           // PageName = controlMetadata.PageName;
+            // PageName = controlMetadata.PageName;
 
             //Locator = pLocator;
             //Location = pControlLocation;
@@ -32,7 +31,7 @@ namespace SeleniumMStestProject.Controls
             //TimeOut = Constants.Timeout.Medium;
         }
 
-        public TimeSpan Timeout {  get; set; }
-        public bool WaitForJquery {get; set;}
+        public TimeSpan Timeout { get; set; }
+        public bool WaitForJquery { get; set; }
     }
 }

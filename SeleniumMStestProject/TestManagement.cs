@@ -8,7 +8,6 @@ namespace TestManagement.Selenium
     {
         private IWebDriver driver;
 
-
         [TestInitialize]
         public void TestInit()
         {
@@ -23,8 +22,5 @@ namespace TestManagement.Selenium
                 this.driver.Quit();
             }
         }
-
-
     }
 }
-

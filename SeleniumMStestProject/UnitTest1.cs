@@ -21,7 +21,7 @@ namespace SeleniumMStestProject
         }
 
         [TestMethod]
-        public void GoToTestPage()
+        public void GoToBaseTestPage()
         {
             var baseUrl = Config.BaseUrl;
             Console.WriteLine($"Base URL: {baseUrl}");
@@ -31,20 +31,19 @@ namespace SeleniumMStestProject
 
             var currentPage = driver.Url;
 
-            Assert.AreEqual(baseUrl, currentPage);
+            Assert.AreEqual( baseUrl, currentPage );
         }
 
         [TestMethod]
         public void WhenUserGoToTestPageCanFillAllTextFields()
         {
-            GoToTestPage();
+            testPage.GoToTestPage();
             testPage.SelectOptionInMyDropdown("Set to 75%");
 
             testPage.EnterTextInMyInput("This is test text.");
         }
 
-        [TestCleanup]
-        public void Cleanup()
+        [TestCleanup] public void Cleanup()
         {
             if (this.driver != null)
             {
