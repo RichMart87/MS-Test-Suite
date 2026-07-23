@@ -1,0 +1,124 @@
+name: PR Test Suite
+
+on:
+  pull_request:
+    branches: [ master, main ]
+  push:
+    branches: [ master, main ]
+
+env:
+  DOTNET_VERSION: '8.0.x'
+  CI: 'true'
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore
+        run: dotnet restore SeleniumMStestProject.sln
+
+      - name: Build
+        run: dotnet build SeleniumMStestProject.sln --no-restore --configuration Release
+
+  smoke-tests:
+    name: Smoke Tests
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Setup Chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
+
+      - name: Run smoke tests
+        run: >
+          dotnet test SeleniumMStestProject.sln
+          --configuration Release
+          --filter "TestCategory=Smoke"
+          --logger "trx;LogFileName=smoke-results.trx"
+          --results-directory ./TestResults
+
+      - name: Upload smoke test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-test-results
+          path: ./TestResults
+
+  e2e-regression-tests:
+    name: E2E & Regression Tests
+    needs: smoke-tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Setup Chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
+
+      - name: Run e2e and regression tests
+        run: >
+          dotnet test SeleniumMStestProject.sln
+          --configuration Release
+          --filter "TestCategory=E2E|TestCategory=Regression"
+          --logger "trx;LogFileName=e2e-regression-results.trx"
+          --results-directory ./TestResults
+
+      - name: Upload e2e/regression test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-regression-test-results
+          path: ./TestResults
+
+  api-tests:
+    name: API Tests
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Run API tests
+        run: >
+          dotnet test SeleniumMStestProject.sln
+          --configuration Release
+          --filter "TestCategory=Api"
+          --logger "trx;LogFileName=api-results.trx"
+          --results-directory ./TestResults
+
+      - name: Upload API test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-test-results
+          path: ./TestResults
