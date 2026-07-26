@@ -1,5 +1,4 @@
 # SeleniumMStestProject
-# SeleniumMStestProject
 This is a sample Selenium test project using MSTest framework. It includes basic setup for running Selenium tests with MSTest, along with example test cases to demonstrate how to use Selenium WebDriver for browser automation.
 ## Prerequisites
 - Visual Studio 2019 or later
