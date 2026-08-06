@@ -9,6 +9,11 @@ namespace SeleniumMStestProject
             get { return ConfigurationManager.AppSettings["BaseUrl"] ?? "https://seleniumbase.io/demo_page"; }
         }
 
+        public static string ApiBaseUrl
+        {
+            get { return ConfigurationManager.AppSettings["ApiBaseUrl"] ?? "https://automationexercise.com"; }
+        }
+
         public static int ImplicitWait
         {
             get { return ImplicitWait; }
