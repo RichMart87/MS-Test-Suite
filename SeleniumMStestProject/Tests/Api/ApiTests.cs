@@ -1,6 +1,7 @@
 using System.Text.Json;
 using SeleniumMStestProject.Base;
 using SeleniumMStestProject.Constants;
+using SeleniumMStestProject.Tests.Api.Models;
 
 namespace SeleniumMStestProject.Tests.Api
 {
@@ -19,6 +20,8 @@ namespace SeleniumMStestProject.Tests.Api
         private const string DeleteAccountEndpoint = "/api/deleteAccount";
         private const string UpdateAccountEndpoint = "/api/updateAccount";
         private const string GetUserDetailByEmailEndpoint = "/api/getUserDetailByEmail";
+
+        private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
 
         [TestMethod]
         public async Task GetProductsList_ReturnsAllProducts()
@@ -47,6 +50,21 @@ namespace SeleniumMStestProject.Tests.Api
 
             Assert.AreEqual(200, GetResponseCode(json));
             Assert.IsGreaterThan(0, json.RootElement.GetProperty("brands").GetArrayLength());
+        }
+
+        [TestMethod]
+        public async Task GetBrandsList_DeserializesToTypedBrand()
+        {
+            var response = await Client.GetAsync(BrandsListEndpoint);
+            var body = await response.Content.ReadAsStringAsync();
+            var brandsResponse = JsonSerializer.Deserialize<BrandsListResponse>(body, JsonOptions);
+
+            Assert.IsNotNull(brandsResponse);
+            Assert.AreEqual(200, brandsResponse.ResponseCode);
+
+            var polo = brandsResponse.Brands.FirstOrDefault(b => b.Id == 1);
+            Assert.IsNotNull(polo, "Expected seeded brand with id 1 to exist.");
+            Assert.AreEqual("Polo", polo.Name);
         }
 
         [TestMethod]
@@ -161,19 +179,18 @@ namespace SeleniumMStestProject.Tests.Api
                 var verifyJson = await ParseResponseAsync(verifyResponse);
                 Assert.AreEqual(200, GetResponseCode(verifyJson), "Newly created account should be able to log in.");
 
-                var getResponse = await Client.GetAsync($"{GetUserDetailByEmailEndpoint}?email={Uri.EscapeDataString(email)}");
-                var getJson = await ParseResponseAsync(getResponse);
-                Assert.AreEqual(200, GetResponseCode(getJson));
-                Assert.AreEqual("Testville", getJson.RootElement.GetProperty("user").GetProperty("city").GetString());
+                var userDetail = await GetUserDetailAsync(email);
+                Assert.AreEqual(200, userDetail.ResponseCode);
+                Assert.AreEqual(email, userDetail.User.Email);
+                Assert.AreEqual("Testville", userDetail.User.City);
 
                 accountFields["city"] = "Updated City";
                 var updateResponse = await Client.PutAsync(UpdateAccountEndpoint, new FormUrlEncodedContent(accountFields));
                 var updateJson = await ParseResponseAsync(updateResponse);
                 Assert.AreEqual(200, GetResponseCode(updateJson), "Account update should succeed.");
 
-                var getAfterUpdateResponse = await Client.GetAsync($"{GetUserDetailByEmailEndpoint}?email={Uri.EscapeDataString(email)}");
-                var getAfterUpdateJson = await ParseResponseAsync(getAfterUpdateResponse);
-                Assert.AreEqual("Updated City", getAfterUpdateJson.RootElement.GetProperty("user").GetProperty("city").GetString());
+                var userDetailAfterUpdate = await GetUserDetailAsync(email);
+                Assert.AreEqual("Updated City", userDetailAfterUpdate.User.City);
             }
             finally
             {
@@ -185,6 +202,16 @@ namespace SeleniumMStestProject.Tests.Api
                 using var deleteRequest = new HttpRequestMessage(HttpMethod.Delete, DeleteAccountEndpoint) { Content = deleteContent };
                 await Client.SendAsync(deleteRequest);
             }
+        }
+
+        private async Task<UserDetailResponse> GetUserDetailAsync(string email)
+        {
+            var response = await Client.GetAsync($"{GetUserDetailByEmailEndpoint}?email={Uri.EscapeDataString(email)}");
+            var body = await response.Content.ReadAsStringAsync();
+            var userDetail = JsonSerializer.Deserialize<UserDetailResponse>(body, JsonOptions);
+
+            Assert.IsNotNull(userDetail);
+            return userDetail;
         }
 
         private static async Task<JsonDocument> ParseResponseAsync(HttpResponseMessage response)
