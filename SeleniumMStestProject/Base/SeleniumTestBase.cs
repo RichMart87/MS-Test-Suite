@@ -5,6 +5,10 @@ namespace SeleniumMStestProject.Base
 {
     public abstract class SeleniumTestBase
     {
+        // Populated automatically by MSTest before each test, including
+        // through inheritance, as long as the property is public with a setter.
+        public TestContext TestContext { get; set; } = null!;
+
         protected IWebDriver Driver { get; private set; } = null!;
 
         [TestInitialize]
@@ -27,8 +31,38 @@ namespace SeleniumMStestProject.Base
         [TestCleanup]
         public void BaseTearDown()
         {
+            if (TestContext.CurrentTestOutcome != UnitTestOutcome.Passed)
+            {
+                CaptureFailureScreenshot();
+            }
+
             Driver?.Quit();
             Driver?.Dispose();
+        }
+
+        private void CaptureFailureScreenshot()
+        {
+            if (Driver is not ITakesScreenshot screenshotDriver)
+            {
+                return;
+            }
+
+            try
+            {
+                var directory = Path.Combine(TestContext.TestResultsDirectory ?? Path.GetTempPath(), "Screenshots");
+                Directory.CreateDirectory(directory);
+
+                var fileName = $"{TestContext.TestName}_{DateTime.UtcNow:yyyyMMdd_HHmmss}.png";
+                var filePath = Path.Combine(directory, fileName);
+
+                screenshotDriver.GetScreenshot().SaveAsFile(filePath);
+                TestContext.AddResultFile(filePath);
+                TestContext.WriteLine($"Screenshot captured on failure: {filePath}");
+            }
+            catch (Exception ex)
+            {
+                TestContext.WriteLine($"Failed to capture failure screenshot: {ex.Message}");
+            }
         }
 
         private static bool IsHeadlessRequested()

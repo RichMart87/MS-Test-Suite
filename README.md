@@ -1,51 +1,100 @@
 # SeleniumMStestProject
-This is a sample Selenium test project using MSTest framework. It includes basic setup for running Selenium tests with MSTest, along with example test cases to demonstrate how to use Selenium WebDriver for browser automation.
-## Prerequisites
-- Visual Studio 2019 or later
-- .NET Framework 4.7.2 or later
-- Selenium WebDriver NuGet package
-- MSTest.TestFramework NuGet package
-- A web browser (e.g., Chrome, Firefox) and corresponding WebDriver (e.g., ChromeDriver, GeckoDriver)
-- Basic knowledge of C# and Selenium WebDriver
-- ## Getting Started
-- Clone the repository or create a new MSTest project in Visual Studio.
-- Install the necessary NuGet packages for Selenium WebDriver and MSTest.
-- Set up your test environment by configuring the WebDriver and browser settings.
-- Write your test cases using MSTest attributes and Selenium WebDriver commands to automate browser interactions.
-- Run your tests using the Test Explorer in Visual Studio and analyze the results.
-- ## Example Test Case
-```csharp
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
 
-namespace SeleniumMStestProject
-{
-	[TestClass]
-	public
-	class SampleTest
-	{
-		private IWebDriver driver;
-		[TestInitialize]
-		public void Setup()
-		{
-			driver = new ChromeDriver();
-			driver.Navigate().GoToUrl("https://www.example.com");
-		}
-		[TestMethod]
-		public void TestExampleDotComTitle()
-		{
-			string title = driver.Title;
-			Assert.AreEqual("Example Domain", title);
-		}
-		[TestCleanup]
-		public void TearDown()
-		{
-			driver.Quit();
-		}
-	}
-	}
-	```
-	## Conclusion
-	This project serves as a basic template for creating Selenium tests using the MSTest framework. You can expand upon this foundation by adding more complex test cases, integrating with CI/CD pipelines, and utilizing additional Selenium features to enhance your test automation efforts.
+A C#/.NET Selenium + MSTest test-automation framework, covering both UI
+(Selenium WebDriver) and API (`HttpClient`) testing, with a GitHub Actions
+pipeline that runs the suite on every push and pull request.
 
+- **UI under test:** https://seleniumbase.io/demo_page
+- **API under test:** https://automationexercise.com/api_list
+
+## Tech stack
+
+- .NET 8.0 (SDK-style project, cross-platform)
+- MSTest (test framework + adapter)
+- Selenium WebDriver 4.44 (Selenium Manager resolves the matching ChromeDriver
+  automatically — no manual driver download needed)
+- `System.Text.Json` for API response deserialization
+- GitHub Actions for CI
+
+## Project structure
+
+```
+SeleniumMStestProject/
+├── Base/
+│   ├── SeleniumTestBase.cs    # ChromeDriver setup/teardown, headless in CI,
+│   │                          # auto screenshot capture on test failure
+│   └── ApiTestBase.cs         # shared HttpClient setup/teardown
+├── Controls/
+│   ├── Control.cs             # reusable, wait-backed element wrapper
+│   └── TextFieldControl.cs    # text-input-specific control
+├── Pages/
+│   └── TestPageLanding.cs     # Page Object for the demo page
+├── Utilities/
+│   └── WaitHelper.cs          # WebDriverWait-based visible/clickable waits
+├── Toggles/
+│   └── FeatureToggle.cs       # config-driven feature toggle example
+├── Constants/
+│   ├── Constants.cs           # timeout presets
+│   └── TestCategories.cs      # Smoke/E2E/Regression/Api category names
+├── Configuration.cs           # typed access to App.config settings
+├── App.config                 # BaseUrl, ApiBaseUrl, wait timeouts, toggle
+└── Tests/
+    ├── Smoke/                 # fast, critical-path UI checks
+    ├── E2E/                   # full user-journey UI tests
+    ├── Regression/            # targeted UI regression checks
+    └── Api/                   # HTTP tests against automationexercise.com,
+        └── Models/            # typed response models for deserialization
+```
+
+A few other folders (`Attributes/`, `Exceptions/`, `Enums/`, `Objects/`,
+`Types/`, `Queries/`, plus root-level `TestManagement.cs` / `TestPage.cs`)
+are pre-existing scaffolding not yet wired into anything — known cleanup
+backlog, left alone intentionally rather than touched blindly.
+
+## Getting started
+
+Prerequisites:
+- [.NET 8 SDK](https://dotnet.microsoft.com/download)
+- Google Chrome installed locally (for UI tests)
+
+```bash
+dotnet restore
+dotnet build
+```
+
+## Running tests
+
+Run everything:
+```bash
+dotnet test
+```
+
+Run a specific category (Smoke, E2E, Regression, or Api):
+```bash
+dotnet test --filter "TestCategory=Smoke"
+```
+
+UI tests run headed by default locally. Set `HEADLESS=true` (or `CI=true`,
+which CI sets automatically) to force headless Chrome.
+
+## Configuration
+
+Settings live in `SeleniumMStestProject/App.config` and are exposed via the
+`Config` class:
+
+| Key | Purpose | Default |
+|---|---|---|
+| `BaseUrl` | UI target for Selenium tests | `https://seleniumbase.io/demo_page` |
+| `ApiBaseUrl` | API target for HTTP tests | `https://automationexercise.com` |
+| `ImplicitWaitSeconds` / `ExplicitWaitSeconds` | Wait timeouts used by `WaitHelper` | `10` / `30` |
+| `FeatureToggle.EnableNavigationDropdownTest` | Gates the nav-dropdown step in the E2E suite (`Assert.Inconclusive` when off) | `true` |
+
+## CI/CD
+
+`.github/workflows/pr-tests.yml` runs on every push/PR to `master`:
+1. **Build** — restore + build the solution.
+2. **Smoke** and **Api** then run in parallel (both only depend on Build).
+3. **E2E & Regression** (headless Chrome) runs after Smoke passes, as a gate against
+   spending time on the slower suite if the fast smoke checks already fail.
+
+Each job publishes its `.trx` results as a build artifact.

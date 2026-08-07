@@ -1,5 +1,7 @@
 ﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
+using SeleniumMStestProject.Controls;
+using SeleniumMStestProject.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,31 +13,36 @@ namespace SeleniumMStestProject.Pages
     internal class TestPageLanding
     {
         private IWebDriver driver;
+        private WaitHelper wait;
+        private TextFieldControl textInputField;
 
         public TestPageLanding(IWebDriver driver)
         {
             this.driver = driver;
+            wait = new WaitHelper(driver);
+            textInputField = new TextFieldControl(driver, FindItBy.Id, "myTextInput");
         }
 
-        public IWebElement Button => driver.FindElement(By.XPath("//*[@id='myButton']"));
+        public IWebElement Button => wait.WaitForClickable(By.Id("myButton"));
 
-        public IWebElement TextInputField => driver.FindElement(By.XPath("//*[@id='myTextInput']"));
+        public IWebElement DropDownSelect => wait.WaitForClickable(By.Id("mySelect"));
 
-        public IWebElement DropDownSelect => driver.FindElement(By.XPath("//*[@id='mySelect']"));
+        public IWebElement NavigationDropdownMenu => wait.WaitForVisible(By.Id("myDropdown"));
+        public IWebElement NavigationLinkOne => wait.WaitForClickable(By.Id("dropOption1"));
+        public IWebElement NavigationLinkTwo => wait.WaitForClickable(By.Id("dropOption2"));
+        public IWebElement NavigationLinkThree => wait.WaitForClickable(By.Id("dropOption3"));
 
-        public IWebElement NavigationDropdownMenu => driver.FindElement(By.Id("myDropdown"));
-        public IWebElement NavigationLinkOne => driver.FindElement(By.Id("dropOption1"));
-        public IWebElement NavigationLinkTwo => driver.FindElement(By.Id("dropOption2"));
-        public IWebElement NavigationLinkThree => driver.FindElement(By.Id("dropOption3"));
-        public IWebElement NavigationText => driver.FindElement(By.XPath("//*[@id='tbodyId']/tr[1]/td[4]/h3"));
+        // The demo page has exactly one <h3> (its own JS looks it up via
+        // document.querySelector("h3")), so this is as stable as an id.
+        public IWebElement NavigationText => wait.WaitForVisible(By.CssSelector("h3"));
 
-        public IWebElement SingleCheckbox => driver.FindElement(By.Id("checkBox1"));
+        public IWebElement SingleCheckbox => wait.WaitForClickable(By.Id("checkBox1"));
 
-        public IWebElement CheckBoxesA => driver.FindElement(By.Id("checkbox2"));
-        public IWebElement CheckBoxesB => driver.FindElement(By.Id("checkbox3"));
-        public IWebElement CheckBoxesC => driver.FindElement(By.Id("checkbox4"));
+        public IWebElement CheckBoxesA => wait.WaitForClickable(By.Id("checkBox2"));
+        public IWebElement CheckBoxesB => wait.WaitForClickable(By.Id("checkBox3"));
+        public IWebElement CheckBoxesC => wait.WaitForClickable(By.Id("checkBox4"));
 
-        public IWebElement UrlLink => driver.FindElement(By.Id("myLink1"));
+        public IWebElement UrlLink => wait.WaitForVisible(By.Id("myLink1"));
 
         public void ClickMyButton()
         {
@@ -89,10 +96,9 @@ namespace SeleniumMStestProject.Pages
 
         public void EnterTextInMyInput(string text)
         {
-            TextInputField.Clear();
-            TextInputField.SendKeys(text);
+            textInputField.EnterText(text);
 
-            Assert.AreEqual(text, TextInputField.GetAttribute("value"));
+            Assert.AreEqual(text, textInputField.Value);
         }
 
         public void SelectOptionInMyDropdown(string optionText)
