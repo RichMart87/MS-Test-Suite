@@ -80,6 +80,15 @@ jobs:
         with:
           chrome-version: stable
 
+      - name: Setup Firefox
+        uses: browser-actions/setup-firefox@v1
+        with:
+          firefox-version: latest
+
+      # Microsoft Edge ships preinstalled on the ubuntu-latest runner image,
+      # so no dedicated setup action is used here (unlike Chrome/Firefox,
+      # its version isn't explicitly pinned by this workflow).
+
       - name: Run e2e and regression tests
         run: >
           dotnet test SeleniumMStestProject.sln
