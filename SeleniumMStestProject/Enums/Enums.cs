@@ -9,6 +9,7 @@
         Safari = 4
     }
 
+    // Note: These enum values below are possible values to initialize different test cases
     public enum LanguageType
     {
         Default = 0,
