@@ -53,8 +53,7 @@ SeleniumMStestProject/
 
 A few other folders (`Attributes/`, `Exceptions/`, `Objects/`, `Types/`,
 `Queries/`, plus root-level `TestManagement.cs` / `TestPage.cs`) are
-pre-existing scaffolding not yet wired into anything — known cleanup backlog,
-left alone intentionally rather than touched blindly.
+pre-existing scaffolding not yet wired into anything — known cleanup backlog, left alone for now.
 
 ## Getting started
 
@@ -91,7 +90,7 @@ hood, `SeleniumTestBase` lazily creates a Chrome driver on first use by
 default; tests that need a specific browser call
 `InitializeDriver(BrowserType.X)` first. Other tests (Smoke, Regression, Api)
 are unaffected and always get Chrome. `BrowserType.Safari` is declared but
-not implemented — no practical cross-platform/CI story for it here.
+not implemented, no practical cross-platform/CI story for it here.
 
 ## Configuration
 
