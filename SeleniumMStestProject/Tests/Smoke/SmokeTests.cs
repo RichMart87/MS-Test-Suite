@@ -17,6 +17,7 @@ namespace SeleniumMStestProject.Tests.Smoke
         }
 
         [TestMethod]
+        [Timeout(TestExecutionTimeouts.UiMilliseconds)]
         public void GoToBaseTestPage()
         {
             var baseUrl = Config.BaseUrl;
@@ -28,6 +29,7 @@ namespace SeleniumMStestProject.Tests.Smoke
         }
 
         [TestMethod]
+        [Timeout(TestExecutionTimeouts.UiMilliseconds)]
         public void WhenUserGoToTestPageCanFillAllTextFields()
         {
             testPage.GoToTestPage();

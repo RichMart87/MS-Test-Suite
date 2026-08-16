@@ -24,6 +24,7 @@ namespace SeleniumMStestProject.Tests.Api
         private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
 
         [TestMethod]
+        [Timeout(TestExecutionTimeouts.ApiMilliseconds)]
         public async Task GetProductsList_ReturnsAllProducts()
         {
             var response = await Client.GetAsync(ProductsListEndpoint);
@@ -34,6 +35,7 @@ namespace SeleniumMStestProject.Tests.Api
         }
 
         [TestMethod]
+        [Timeout(TestExecutionTimeouts.ApiMilliseconds)]
         public async Task PostToProductsList_ReturnsMethodNotAllowed()
         {
             var response = await Client.PostAsync(ProductsListEndpoint, null);
@@ -43,6 +45,7 @@ namespace SeleniumMStestProject.Tests.Api
         }
 
         [TestMethod]
+        [Timeout(TestExecutionTimeouts.ApiMilliseconds)]
         public async Task GetBrandsList_ReturnsAllBrands()
         {
             var response = await Client.GetAsync(BrandsListEndpoint);
@@ -53,6 +56,7 @@ namespace SeleniumMStestProject.Tests.Api
         }
 
         [TestMethod]
+        [Timeout(TestExecutionTimeouts.ApiMilliseconds)]
         public async Task GetBrandsList_DeserializesToTypedBrand()
         {
             var response = await Client.GetAsync(BrandsListEndpoint);
@@ -68,6 +72,7 @@ namespace SeleniumMStestProject.Tests.Api
         }
 
         [TestMethod]
+        [Timeout(TestExecutionTimeouts.ApiMilliseconds)]
         public async Task PutToBrandsList_ReturnsMethodNotAllowed()
         {
             var response = await Client.PutAsync(BrandsListEndpoint, null);
@@ -77,6 +82,7 @@ namespace SeleniumMStestProject.Tests.Api
         }
 
         [TestMethod]
+        [Timeout(TestExecutionTimeouts.ApiMilliseconds)]
         public async Task SearchProduct_WithValidTerm_ReturnsMatchingProducts()
         {
             var content = new FormUrlEncodedContent(new Dictionary<string, string>
@@ -92,6 +98,7 @@ namespace SeleniumMStestProject.Tests.Api
         }
 
         [TestMethod]
+        [Timeout(TestExecutionTimeouts.ApiMilliseconds)]
         public async Task SearchProduct_WithoutSearchTerm_ReturnsBadRequest()
         {
             var response = await Client.PostAsync(SearchProductEndpoint, null);
@@ -101,6 +108,7 @@ namespace SeleniumMStestProject.Tests.Api
         }
 
         [TestMethod]
+        [Timeout(TestExecutionTimeouts.ApiMilliseconds)]
         public async Task VerifyLogin_WithInvalidCredentials_ReturnsUserNotFound()
         {
             var content = new FormUrlEncodedContent(new Dictionary<string, string>
@@ -116,6 +124,7 @@ namespace SeleniumMStestProject.Tests.Api
         }
 
         [TestMethod]
+        [Timeout(TestExecutionTimeouts.ApiMilliseconds)]
         public async Task VerifyLogin_WithoutEmail_ReturnsBadRequest()
         {
             var content = new FormUrlEncodedContent(new Dictionary<string, string>
@@ -130,6 +139,7 @@ namespace SeleniumMStestProject.Tests.Api
         }
 
         [TestMethod]
+        [Timeout(TestExecutionTimeouts.ApiMilliseconds)]
         public async Task VerifyLogin_UsingDeleteMethod_ReturnsMethodNotAllowed()
         {
             var response = await Client.DeleteAsync(VerifyLoginEndpoint);
@@ -139,6 +149,7 @@ namespace SeleniumMStestProject.Tests.Api
         }
 
         [TestMethod]
+        [Timeout(TestExecutionTimeouts.ApiMilliseconds)]
         public async Task UserAccountLifecycle_CreateVerifyUpdateDelete_Succeeds()
         {
             var email = $"qa_regression_{Guid.NewGuid():N}@example.com";

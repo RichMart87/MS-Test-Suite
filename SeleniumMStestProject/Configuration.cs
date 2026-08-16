@@ -1,26 +1,18 @@
-using System.Configuration;
+using Microsoft.Extensions.Configuration;
+
 
 namespace SeleniumMStestProject
 {
     internal class Config
     {
-        // ConfigurationManager.AppSettings resolves against the *entry process's*
-        // config file. Under `dotnet test` that's the VSTest test host, which has
-        // no matching .config, so the ambient AppSettings lookup silently returns
-        // null for every key. Load our own assembly's shipped .dll.config
-        // explicitly instead so App.config values are actually honored.
-        private static readonly Configuration AppConfig = LoadAppConfig();
-
-        private static Configuration LoadAppConfig()
-        {
-            var configPath = Path.Combine(AppContext.BaseDirectory, $"{typeof(Config).Assembly.GetName().Name}.dll.config");
-            var map = new ExeConfigurationFileMap { ExeConfigFilename = configPath };
-            return ConfigurationManager.OpenMappedExeConfiguration(map, ConfigurationUserLevel.None);
-        }
+        private static readonly IConfigurationRoot AppConfig = new ConfigurationBuilder()
+            .SetBasePath(AppContext.BaseDirectory)
+            .AddJsonFile("appsettings.json", optional: false)
+            .Build();
 
         internal static string? GetSetting(string key)
         {
-            return AppConfig.AppSettings.Settings[key]?.Value;
+            return AppConfig[key];
         }
 
         public static string BaseUrl
