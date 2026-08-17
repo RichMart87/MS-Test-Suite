@@ -54,6 +54,7 @@ jobs:
         run: >
           dotnet test SeleniumMStestProject.sln
           --configuration Release
+          --settings test.runsettings
           --filter "TestCategory=Smoke"
           --logger "trx;LogFileName=smoke-results.trx"
           --results-directory ./TestResults
@@ -96,6 +97,7 @@ jobs:
         run: >
           dotnet test SeleniumMStestProject.sln
           --configuration Release
+          --settings test.runsettings
           --filter "TestCategory=E2E|TestCategory=Regression"
           --logger "trx;LogFileName=e2e-regression-results.trx"
           --results-directory ./TestResults
@@ -124,6 +126,7 @@ jobs:
         run: >
           dotnet test SeleniumMStestProject.sln
           --configuration Release
+          --settings test.runsettings
           --filter "TestCategory=Api"
           --logger "trx;LogFileName=api-results.trx"
           --results-directory ./TestResults
