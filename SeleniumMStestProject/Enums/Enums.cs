@@ -23,7 +23,7 @@
     {
         Default = 0,
         Local = 1,
-        Remote = 2,
+        QA = 2,
         Staging = 3,
         Production = 4
     }

@@ -5,9 +5,10 @@ using SeleniumMStestProject.Tests.Api.Models;
 
 namespace SeleniumMStestProject.Tests.Api
 {
-    // API under test: https://automationexercise.com/api_list
-    // Note: this API always responds with HTTP 200 at the transport level.
-    // The real status is embedded in the JSON body's "responseCode" field.
+    /* API under test: https://automationexercise.com/api_list
+     * Note: this API always responds with HTTP 200 at the transport level.
+     * The real status is embedded in the JSON body's "responseCode" field.
+     */
     [TestClass]
     [TestCategory(TestCategories.Api)]
     public class ApiTests : ApiTestBase
@@ -27,8 +28,7 @@ namespace SeleniumMStestProject.Tests.Api
         [Timeout(TestExecutionTimeouts.ApiMilliseconds)]
         public async Task GetProductsList_ReturnsAllProducts()
         {
-            var response = await Client.GetAsync(ProductsListEndpoint);
-            var json = await ParseResponseAsync(response);
+            var json = JsonDocument.Parse(await GetJsonBodyAsync(() => Client.GetAsync(ProductsListEndpoint)));
 
             Assert.AreEqual(200, GetResponseCode(json));
             Assert.IsGreaterThan(0, json.RootElement.GetProperty("products").GetArrayLength());
@@ -38,8 +38,7 @@ namespace SeleniumMStestProject.Tests.Api
         [Timeout(TestExecutionTimeouts.ApiMilliseconds)]
         public async Task PostToProductsList_ReturnsMethodNotAllowed()
         {
-            var response = await Client.PostAsync(ProductsListEndpoint, null);
-            var json = await ParseResponseAsync(response);
+            var json = JsonDocument.Parse(await GetJsonBodyAsync(() => Client.PostAsync(ProductsListEndpoint, null)));
 
             Assert.AreEqual(405, GetResponseCode(json));
         }
@@ -48,8 +47,7 @@ namespace SeleniumMStestProject.Tests.Api
         [Timeout(TestExecutionTimeouts.ApiMilliseconds)]
         public async Task GetBrandsList_ReturnsAllBrands()
         {
-            var response = await Client.GetAsync(BrandsListEndpoint);
-            var json = await ParseResponseAsync(response);
+            var json = JsonDocument.Parse(await GetJsonBodyAsync(() => Client.GetAsync(BrandsListEndpoint)));
 
             Assert.AreEqual(200, GetResponseCode(json));
             Assert.IsGreaterThan(0, json.RootElement.GetProperty("brands").GetArrayLength());
@@ -59,8 +57,7 @@ namespace SeleniumMStestProject.Tests.Api
         [Timeout(TestExecutionTimeouts.ApiMilliseconds)]
         public async Task GetBrandsList_DeserializesToTypedBrand()
         {
-            var response = await Client.GetAsync(BrandsListEndpoint);
-            var body = await response.Content.ReadAsStringAsync();
+            var body = await GetJsonBodyAsync(() => Client.GetAsync(BrandsListEndpoint));
             var brandsResponse = JsonSerializer.Deserialize<BrandsListResponse>(body, JsonOptions);
 
             Assert.IsNotNull(brandsResponse);
@@ -75,8 +72,7 @@ namespace SeleniumMStestProject.Tests.Api
         [Timeout(TestExecutionTimeouts.ApiMilliseconds)]
         public async Task PutToBrandsList_ReturnsMethodNotAllowed()
         {
-            var response = await Client.PutAsync(BrandsListEndpoint, null);
-            var json = await ParseResponseAsync(response);
+            var json = JsonDocument.Parse(await GetJsonBodyAsync(() => Client.PutAsync(BrandsListEndpoint, null)));
 
             Assert.AreEqual(405, GetResponseCode(json));
         }
@@ -90,8 +86,7 @@ namespace SeleniumMStestProject.Tests.Api
                 ["search_product"] = "top"
             });
 
-            var response = await Client.PostAsync(SearchProductEndpoint, content);
-            var json = await ParseResponseAsync(response);
+            var json = JsonDocument.Parse(await GetJsonBodyAsync(() => Client.PostAsync(SearchProductEndpoint, content)));
 
             Assert.AreEqual(200, GetResponseCode(json));
             Assert.IsGreaterThan(0, json.RootElement.GetProperty("products").GetArrayLength());
@@ -101,8 +96,7 @@ namespace SeleniumMStestProject.Tests.Api
         [Timeout(TestExecutionTimeouts.ApiMilliseconds)]
         public async Task SearchProduct_WithoutSearchTerm_ReturnsBadRequest()
         {
-            var response = await Client.PostAsync(SearchProductEndpoint, null);
-            var json = await ParseResponseAsync(response);
+            var json = JsonDocument.Parse(await GetJsonBodyAsync(() => Client.PostAsync(SearchProductEndpoint, null)));
 
             Assert.AreEqual(400, GetResponseCode(json));
         }
@@ -117,8 +111,7 @@ namespace SeleniumMStestProject.Tests.Api
                 ["password"] = "not-the-right-password"
             });
 
-            var response = await Client.PostAsync(VerifyLoginEndpoint, content);
-            var json = await ParseResponseAsync(response);
+            var json = JsonDocument.Parse(await GetJsonBodyAsync(() => Client.PostAsync(VerifyLoginEndpoint, content)));
 
             Assert.AreEqual(404, GetResponseCode(json));
         }
@@ -132,8 +125,7 @@ namespace SeleniumMStestProject.Tests.Api
                 ["password"] = "irrelevant"
             });
 
-            var response = await Client.PostAsync(VerifyLoginEndpoint, content);
-            var json = await ParseResponseAsync(response);
+            var json = JsonDocument.Parse(await GetJsonBodyAsync(() => Client.PostAsync(VerifyLoginEndpoint, content)));
 
             Assert.AreEqual(400, GetResponseCode(json));
         }
@@ -142,8 +134,7 @@ namespace SeleniumMStestProject.Tests.Api
         [Timeout(TestExecutionTimeouts.ApiMilliseconds)]
         public async Task VerifyLogin_UsingDeleteMethod_ReturnsMethodNotAllowed()
         {
-            var response = await Client.DeleteAsync(VerifyLoginEndpoint);
-            var json = await ParseResponseAsync(response);
+            var json = JsonDocument.Parse(await GetJsonBodyAsync(() => Client.DeleteAsync(VerifyLoginEndpoint)));
 
             Assert.AreEqual(405, GetResponseCode(json));
         }
@@ -175,8 +166,8 @@ namespace SeleniumMStestProject.Tests.Api
                 ["mobile_number"] = "1234567890"
             };
 
-            var createResponse = await Client.PostAsync(CreateAccountEndpoint, new FormUrlEncodedContent(accountFields));
-            var createJson = await ParseResponseAsync(createResponse);
+            var createJson = JsonDocument.Parse(await GetJsonBodyAsync(
+                () => Client.PostAsync(CreateAccountEndpoint, new FormUrlEncodedContent(accountFields))));
             Assert.AreEqual(201, GetResponseCode(createJson), "Account creation should succeed.");
 
             try
@@ -186,8 +177,7 @@ namespace SeleniumMStestProject.Tests.Api
                     ["email"] = email,
                     ["password"] = password
                 });
-                var verifyResponse = await Client.PostAsync(VerifyLoginEndpoint, verifyContent);
-                var verifyJson = await ParseResponseAsync(verifyResponse);
+                var verifyJson = JsonDocument.Parse(await GetJsonBodyAsync(() => Client.PostAsync(VerifyLoginEndpoint, verifyContent)));
                 Assert.AreEqual(200, GetResponseCode(verifyJson), "Newly created account should be able to log in.");
 
                 var userDetail = await GetUserDetailAsync(email);
@@ -196,8 +186,8 @@ namespace SeleniumMStestProject.Tests.Api
                 Assert.AreEqual("Testville", userDetail.User.City);
 
                 accountFields["city"] = "Updated City";
-                var updateResponse = await Client.PutAsync(UpdateAccountEndpoint, new FormUrlEncodedContent(accountFields));
-                var updateJson = await ParseResponseAsync(updateResponse);
+                var updateJson = JsonDocument.Parse(await GetJsonBodyAsync(
+                    () => Client.PutAsync(UpdateAccountEndpoint, new FormUrlEncodedContent(accountFields))));
                 Assert.AreEqual(200, GetResponseCode(updateJson), "Account update should succeed.");
 
                 var userDetailAfterUpdate = await GetUserDetailAsync(email);
@@ -217,18 +207,51 @@ namespace SeleniumMStestProject.Tests.Api
 
         private async Task<UserDetailResponse> GetUserDetailAsync(string email)
         {
-            var response = await Client.GetAsync($"{GetUserDetailByEmailEndpoint}?email={Uri.EscapeDataString(email)}");
-            var body = await response.Content.ReadAsStringAsync();
+            var body = await GetJsonBodyAsync(() => Client.GetAsync($"{GetUserDetailByEmailEndpoint}?email={Uri.EscapeDataString(email)}"));
             var userDetail = JsonSerializer.Deserialize<UserDetailResponse>(body, JsonOptions);
 
             Assert.IsNotNull(userDetail);
             return userDetail;
         }
 
-        private static async Task<JsonDocument> ParseResponseAsync(HttpResponseMessage response)
+        /* automationexercise.com is fronted by Cloudflare, which occasionally
+         * serves an HTML challenge/block page instead of the real API
+         * response to requests from shared CI IP ranges. That HTML starts
+         * with '<', which fails JSON parsing with a cryptic error. Retry a
+         * couple of times with backoff, and if it's still not JSON, fail
+         * with a message that says what actually happened.*/
+        private static async Task<string> GetJsonBodyAsync(Func<Task<HttpResponseMessage>> sendRequest, int maxAttempts = 3)
         {
-            var body = await response.Content.ReadAsStringAsync();
-            return JsonDocument.Parse(body);
+            var body = string.Empty;
+
+            for (var attempt = 1; attempt <= maxAttempts; attempt++)
+            {
+                using var response = await sendRequest();
+                body = await response.Content.ReadAsStringAsync();
+
+                if (LooksLikeJson(body))
+                {
+                    return body;
+                }
+
+                if (attempt < maxAttempts)
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(2 * attempt));
+                }
+            }
+
+            var preview = body.Length > 200 ? body[..200] : body;
+            Assert.Fail(
+                $"Expected a JSON response from {Config.ApiBaseUrl} but received non-JSON content after " +
+                $"{maxAttempts} attempts - likely a Cloudflare challenge/block page for this network. " +
+                $"Response preview: {preview}");
+            return body; // unreachable, Assert.Fail throws
+        }
+
+        private static bool LooksLikeJson(string body)
+        {
+            var trimmed = body.TrimStart();
+            return trimmed.StartsWith('{') || trimmed.StartsWith('[');
         }
 
         private static int GetResponseCode(JsonDocument json)

@@ -1,5 +1,6 @@
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Chromium;
 using OpenQA.Selenium.Edge;
 using OpenQA.Selenium.Firefox;
 using SeleniumMStestProject.Enums;
@@ -8,17 +9,19 @@ namespace SeleniumMStestProject.Base
 {
     public abstract class SeleniumTestBase
     {
-        // Populated automatically by MSTest before each test, including
-        // through inheritance, as long as the property is public with a setter.
+        /* Populated automatically by MSTest before each test, including
+         * through inheritance, as long as the property is public with a setter.
+         */
         public TestContext TestContext { get; set; } = null!;
 
         private IWebDriver? driver;
         private BrowserType? initializedBrowser;
 
-        // creates a Chrome driver on first access if no test has
-        // explicitly called InitializeDriver(browserType) yet
-        // keep single-browser tests unchanged while letting cross-browser tests
-        // opt in without ever launching an unwanted default browser
+        /* creates a Chrome driver on first access if no test has
+         * explicitly called InitializeDriver(browserType) yet
+         * keep single-browser tests unchanged while letting cross-browser tests
+         * opt in without ever launching an unwanted default browser
+         */
         protected IWebDriver Driver
         {
             get
@@ -61,7 +64,7 @@ namespace SeleniumMStestProject.Base
 
         private static IWebDriver CreateDriver(BrowserType browserType)
         {
-            var headless = IsHeadlessRequested();
+            var headless = Config.IsHeadless;
 
             return browserType switch
             {
@@ -75,6 +78,8 @@ namespace SeleniumMStestProject.Base
         private static IWebDriver CreateChromeDriver(bool headless)
         {
             var options = new ChromeOptions();
+            BlockAdDomains(options);
+            options.PageLoadStrategy = PageLoadStrategy.Eager;
             if (headless)
             {
                 options.AddArgument("--headless=new");
@@ -90,6 +95,14 @@ namespace SeleniumMStestProject.Base
         private static IWebDriver CreateFirefoxDriver(bool headless)
         {
             var options = new FirefoxOptions();
+            /* Firefox has no equivalent to Chromium's --host-resolver-rules, so
+             * ad domains aren't null-routed here; "eager" is what keeps
+             * GeckoDriver from hanging (observed: a 60s timeout on an
+             * otherwise-successful click) on a slow/never-completing ad
+             * resource after navigation, by returning once the DOM is
+             * interactive instead of waiting for the full "load" event.
+             */
+            options.PageLoadStrategy = PageLoadStrategy.Eager;
             if (headless)
             {
                 options.AddArgument("-headless");
@@ -103,6 +116,8 @@ namespace SeleniumMStestProject.Base
         private static IWebDriver CreateEdgeDriver(bool headless)
         {
             var options = new EdgeOptions();
+            BlockAdDomains(options);
+            options.PageLoadStrategy = PageLoadStrategy.Eager;
             if (headless)
             {
                 options.AddArgument("--headless=new");
@@ -113,6 +128,22 @@ namespace SeleniumMStestProject.Base
             }
 
             return new EdgeDriver(options);
+        }
+
+        /* automationexercise.com serves live Google ad iframes that can grow to
+         * cover most of the viewport and intercept clicks on real page content.
+         * Null-routing the ad domains at the Chromium network layer is far more
+         * reliable than trying to click around an ad that loads unpredictably.
+         */
+        private static void BlockAdDomains(ChromiumOptions options)
+        {
+            options.AddArgument(
+                "--host-resolver-rules=" +
+                "MAP googleads.g.doubleclick.net 0.0.0.0, " +
+                "MAP pagead2.googlesyndication.com 0.0.0.0, " +
+                "MAP tpc.googlesyndication.com 0.0.0.0, " +
+                "MAP www.googletagservices.com 0.0.0.0, " +
+                "MAP securepubads.g.doubleclick.net 0.0.0.0");
         }
 
         private void CaptureFailureScreenshot()
@@ -138,16 +169,6 @@ namespace SeleniumMStestProject.Base
             {
                 TestContext.WriteLine($"Failed to capture failure screenshot: {ex.Message}");
             }
-        }
-
-        private static bool IsHeadlessRequested()
-        {
-            return IsEnvVarTrue("CI") || IsEnvVarTrue("HEADLESS");
-        }
-
-        private static bool IsEnvVarTrue(string name)
-        {
-            return string.Equals(Environment.GetEnvironmentVariable(name), "true", StringComparison.OrdinalIgnoreCase);
         }
     }
 }

@@ -10,8 +10,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Enums.NET" Version="5.0.0" />
-    <PackageReference Include="FluentAssertions" Version="8.6.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.8" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.11" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.11" />
@@ -22,13 +20,9 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="NUnit" Version="4.6.1" />
-    <PackageReference Include="ReportUnit" Version="1.2.1" />
     <PackageReference Include="Selenium.Support" Version="4.44.0" />
     <PackageReference Include="Selenium.WebDriver" Version="4.44.0" />
     <PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="151.0.7922.7600" />
-    <PackageReference Include="Selenium.WebDriver.Extensions" Version="4.1.0" />
-    <PackageReference Include="xunit.assert" Version="2.9.3" />
   </ItemGroup>
 
   <ItemGroup>

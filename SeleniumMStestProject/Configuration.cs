@@ -34,5 +34,15 @@ namespace SeleniumMStestProject
         {
             get { return int.TryParse(GetSetting("ExplicitWaitSeconds"), out var seconds) ? seconds : 30; }
         }
+
+        internal static bool IsHeadless
+        {
+            get { return IsEnvVarTrue("CI") || IsEnvVarTrue("HEADLESS"); }
+        }
+
+        private static bool IsEnvVarTrue(string name)
+        {
+            return string.Equals(Environment.GetEnvironmentVariable(name), "true", StringComparison.OrdinalIgnoreCase);
+        }
     }
 }

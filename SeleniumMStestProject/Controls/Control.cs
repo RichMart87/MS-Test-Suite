@@ -10,6 +10,7 @@ namespace SeleniumMStestProject.Controls
         Name,
         DataTerm,
         DataSysTestId,
+        DataQa,
         PartialCssClass
     }
 
@@ -24,8 +25,6 @@ namespace SeleniumMStestProject.Controls
 
         public TimeSpan JqueryWaitTime { get; set; } = Constants.Timeout.Medium;
 
-        // Opt-in: only relevant on pages that use jQuery for async rendering.
-        // Off by default since seleniumbase.io/demo_page doesn't use jQuery.
         public bool WaitForJquery { get; set; } = false;
 
         public Control(IWebDriver driver, FindItBy locatorType, string locatorValue)
@@ -90,6 +89,7 @@ namespace SeleniumMStestProject.Controls
                 FindItBy.Name => By.Name(locatorValue),
                 FindItBy.DataTerm => By.CssSelector($"[data-term='{locatorValue}']"),
                 FindItBy.DataSysTestId => By.CssSelector($"[data-sys-test-id='{locatorValue}']"),
+                FindItBy.DataQa => By.CssSelector($"[data-qa='{locatorValue}']"),
                 FindItBy.PartialCssClass => By.CssSelector($"[class*='{locatorValue}']"),
                 _ => throw new ArgumentOutOfRangeException(nameof(locatorType), locatorType, "Unsupported locator type.")
             };
