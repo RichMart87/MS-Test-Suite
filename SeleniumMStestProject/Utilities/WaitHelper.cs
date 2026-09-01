@@ -17,8 +17,15 @@ namespace SeleniumMStestProject.Utilities
         {
             return wait.Until(drv =>
             {
-                var element = drv.FindElement(locator);
-                return element.Displayed ? element : null;
+                try
+                {
+                    var element = drv.FindElement(locator);
+                    return element.Displayed ? element : null;
+                }
+                catch (NoSuchElementException)
+                {
+                    return null;
+                }
             });
         }
 
@@ -26,8 +33,15 @@ namespace SeleniumMStestProject.Utilities
         {
             return wait.Until(drv =>
             {
-                var element = drv.FindElement(locator);
-                return element.Displayed && element.Enabled ? element : null;
+                try
+                {
+                    var element = drv.FindElement(locator);
+                    return element.Displayed && element.Enabled ? element : null;
+                }
+                catch (NoSuchElementException)
+                {
+                    return null;
+                }
             });
         }
     }
