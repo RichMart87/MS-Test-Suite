@@ -32,7 +32,7 @@ namespace SeleniumMStestProject
 
         public static int ExplicitWait
         {
-            get { return int.TryParse(GetSetting("ExplicitWaitSeconds"), out var seconds) ? seconds : 30; }
+            get { return int.TryParse(GetSetting("ExplicitWaitSeconds"), out var seconds) ? seconds : 60; }
         }
 
         internal static bool IsHeadless
